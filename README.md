@@ -1,2 +1,2 @@
 # HalmaJS
-Game of Halma using Javascript
+Game of [Halma](https://en.wikipedia.org/wiki/Halma) using Javascript

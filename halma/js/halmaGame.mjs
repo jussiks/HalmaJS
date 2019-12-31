@@ -74,11 +74,13 @@ export class HalmaGame {
     }
 
     setChosenPiece(piece) {
-        if (this.chosenPiece) 
+        if (piece.color === this.players[this.playerInTurn].color) {
+            if (this.chosenPiece)
             this.chosenPiece.highlight(false);
 
-        piece.highlight(true);
-        this.chosenPiece = piece;
+            piece.highlight(true);
+            this.chosenPiece = piece;
+        }
     }
 
     changeTurn() {

@@ -97,7 +97,6 @@ function onNewGameClick(e) {
     resizeBoard();
 }
 
-// Pelaaja lopettaa vuoronsa klikkaamalla vuoron lopetusta.
 function onEndTurnClick(e) {
     e.preventDefault();
     halma.changeTurn();

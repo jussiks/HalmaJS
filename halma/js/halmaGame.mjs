@@ -19,11 +19,12 @@ export class HalmaGame {
         for (let k in colors) {
             this.players.push(new Player(colors[k]));
         }
-        this.playerInTurn = 0; //TODO randomize this
+        this.playerInTurn = Math.floor(Math.random() * this.players.length);
+        this.turnContinues = false;
 
         this.msgCallback(
-            `${this.players[this.playerInTurn].color} player turn`, 
-            this.players[this.playerInTurn].color
+            `${this.getPlayerInTurn().color} player turn`, 
+            this.getPlayerInTurn().color
         );
 
         let szones = this.settings.getStartZones();
@@ -51,7 +52,8 @@ export class HalmaGame {
             'settings': this.settings.toJSON(),
             'players': this.players.map(p => p.toJSON()),
             'playerInTurn': this.playerInTurn,
-            'chosenPiece': this.chosenPiece ? this.chosenPiece.toJSON() : undefined
+            'chosenPiece': this.chosenPiece ? this.chosenPiece.toJSON() : undefined,
+            'turnContinues': this.turnContinues
         };
     }
 
@@ -61,6 +63,10 @@ export class HalmaGame {
         return halma;
     }
 
+    getPlayerInTurn() {
+        return this.players[this.playerInTurn];
+    }
+
     onTdClick(square) {
         if (this.chosenPiece)
             this.movePiece(this.chosenPiece, square);
@@ -68,13 +74,23 @@ export class HalmaGame {
 
     movePiece(piece, square) {
         let move = new Move(piece, square);
-        move.execute();
+        if (move.isValid()) {
+            move.execute();
 
-        //TODO turn continues check
+            this.turnContinues = this.canContinue();
+            if (!this.turnContinues) {
+                this.changeTurn();
+            }
+        }
+    }
+
+    canContinue() {
+        //TODO
+        return false;
     }
 
     setChosenPiece(piece) {
-        if (piece.color === this.players[this.playerInTurn].color) {
+        if (piece.color === this.getPlayerInTurn().color && !this.turnContinues) {
             if (this.chosenPiece)
             this.chosenPiece.highlight(false);
 
@@ -84,9 +100,17 @@ export class HalmaGame {
     }
 
     changeTurn() {
-        console.log('not yet implemented');
-        //TODO
+        this.playerInTurn += 1;
+        this.playerInTurn = this.playerInTurn % this.players.length;
+        this.turnContinues = false;
+        if (this.chosenPiece)
+            this.chosenPiece.highlight(false);
+        this.chosenPiece = undefined;
         this.saveGameCallback();
+        this.msgCallback(
+            `${this.getPlayerInTurn().color} player turn`, 
+            this.getPlayerInTurn().color
+        );
     }
 
     resizeSquares(squareSize) {

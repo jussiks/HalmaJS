@@ -45,12 +45,29 @@ export class Square {
         this.td.style.height = size;
     }
 
-    * getNeighbours([x, y]) {
+    absDistance(otherSquare) {
+        return this.distance(otherSquare).map(x => Math.abs(x));
+    }
+
+    distance(otherSquare) {
+        return [
+            this.getPosition()[0] - otherSquare.getPosition()[0],
+            this.getPosition()[1] - otherSquare.getPosition()[1]
+        ]
+    }
+
+    * getNeighbours(distance = 1) {
+        distance = distance > 0 ? distance : 1;
         for (let i = -1; i < 2; i++) {
             for (let j = -1; j < 2; j++) {
                 if (i === 0 && j === 0)
                     continue;
-                yield this.board.getSquare()[y + i][x + j];
+                let sqr = this.board.getSquare([
+                    this.getPosition()[0] + j * distance,
+                    this.getPosition()[1] + i * distance
+                ]);
+                if (sqr)
+                    yield sqr;
             }
         }
     }

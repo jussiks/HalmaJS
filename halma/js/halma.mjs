@@ -19,8 +19,12 @@ window.onload = function () {
     window.addEventListener('keydown', onKeyDown, false);
 
     halma = loadGame();
-    updateForm(new HalmaSettings());
-    //saveSettings(settings);
+    if (halma.board) {
+        boardDiv.appendChild(halma.getElement());
+        updateForm(halma.settings);
+        resizeBoard();
+    }
+    else updateForm(new HalmaSettings());
 };
 
 // When window is resized, board will be resized to fit current window.
@@ -64,7 +68,6 @@ function getAvailableScreenSpace() {
     return Math.max(Math.min(width, height), 300)
 }
 
-// Skaalaa ruudukon sopivan kokoiseksi.
 function resizeBoard() {
     let size = getAvailableScreenSpace();
     let squares = document.getElementsByTagName('td');
@@ -124,7 +127,8 @@ function loadGame() {
         console.log(halmaJson);
         return HalmaGame.fromJSON(halmaJson, showMessage, saveGame);
     } 
-    catch {
+    catch (e) {
+        console.log(e);
         return new HalmaGame(showMessage, saveGame);
     }
 }

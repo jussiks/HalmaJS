@@ -3,13 +3,16 @@ export class Move {
         this.piece = piece;
         this.curSquare = piece.getSquare();
         this.targetSquare = targetSquare;
-        this.distance = this.getDistance();
 
+        this.canJumpAgain = false;
         this.jump = false;
         this.valid = 
             this.isTargetEmpty() &&
             !this.isMoveAwayFromGoal() &&
             this.isDistanceValid()
+
+        if (this.valid && this.jump)
+            this.canJumpAgain = this.checkCanJumpAgain();
     }
 
     isTargetEmpty() {
@@ -17,35 +20,26 @@ export class Move {
     }
 
     isMoveAwayFromGoal() {
-        return this.curSquare.isGoalZone(this.piece) && !this.targetSquare.isGoalZone(this.piece);
+        return this.curSquare.isGoalZone(this.piece) && 
+            !this.targetSquare.isGoalZone(this.piece);
     }
 
     isDistanceValid() {
-        if (Math.max(...this.distance) === 1)
+        let absDistance = this.curSquare.absDistance(
+            this.targetSquare);
+        if (Math.max(...absDistance) === 1)
             return true;
-        if (Math.max(...this.distance) === 2 && Math.min(...this.distance) !== 1) {
-            let gapSquare = this.getGapSquare();
-            if (gapSquare.containsPiece()) {
-                this.jump = true;
+        this.jump = canJump(this.curSquare, this.targetSquare);
+        return this.jump;
+    }
+
+    checkCanJumpAgain() {
+        let neighbours = this.targetSquare.getNeighbours(2);
+        for (let newTarget of neighbours) {
+            if (canJump(this.targetSquare, newTarget))
                 return true;
-            }
         }
         return false;
-    }
-
-    getGapSquare() {
-        let gapPos = [
-            (this.curSquare.getPosition()[0] + this.targetSquare.getPosition()[0]) / 2,
-            (this.curSquare.getPosition()[1] + this.targetSquare.getPosition()[1]) / 2
-        ];
-        return this.targetSquare.board.getSquare(gapPos);
-    }
-
-    getDistance() {
-        return [
-            Math.abs(this.curSquare.getPosition()[0] - this.targetSquare.getPosition()[0]),
-            Math.abs(this.curSquare.getPosition()[1] - this.targetSquare.getPosition()[1])
-        ]
     }
 
     isValid() {
@@ -56,8 +50,35 @@ export class Move {
         return this.jump
     }
 
+    canJumpAgain() {
+        return this.canJumpAgain;
+    }
+
     execute() {
         if (this.valid)
             this.piece.place(this.targetSquare);
     }
+}
+
+
+function canJump(curSquare, targetSquare) {
+    if (targetSquare.containsPiece())
+        return false;
+    let absDistance = curSquare.absDistance(targetSquare);
+
+    if (Math.max(...absDistance) === 2 && Math.min(...absDistance) !== 1) {
+        let gapSquare = getSquareBetween(curSquare, targetSquare);
+        if (gapSquare.containsPiece())
+            return true;
+    }
+    return false;
+}
+
+// Returns the square between two squares.
+function getSquareBetween(square1, square2) {
+    let gapPos = [
+        (square1.getPosition()[0] + square2.getPosition()[0]) / 2,
+        (square1.getPosition()[1] + square2.getPosition()[1]) / 2
+    ];
+    return square1.board.getSquare(gapPos);
 }

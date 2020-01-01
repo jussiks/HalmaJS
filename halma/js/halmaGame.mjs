@@ -2,6 +2,7 @@ import {Piece} from "./piece.mjs";
 import {Player} from './player.mjs';
 import {Board} from './board.mjs';
 import {Move} from './move.mjs';
+import {HalmaSettings} from './halmaSettings.mjs';
 
 export class HalmaGame {
     constructor(msgCallback, saveGameCallback) {
@@ -59,7 +60,24 @@ export class HalmaGame {
 
     static fromJSON(json, msgCallback, saveGameCallback) {
         let halma = new HalmaGame(msgCallback, saveGameCallback);
+        halma.settings = HalmaSettings.fromJSON(json['settings']);
+        halma.board = new Board(halma.settings, halma.onTdClick.bind(halma));
+        halma.players = json['players'].map(j => Player.fromJSON(j, halma.setChosenPiece.bind(halma), halma.board));
+        halma.playerInTurn = json['playerInTurn'];
         //TODO
+        halma.chosenPiece = halma.getPlayerInTurn().pieces.find(
+            p => p.toJSON() === json['chosenPiece']
+        );
+        halma.turnContinues = json['turnContinues'];
+
+        if (halma.chosenPiece)
+            halma.setChosenPiece(halma.chosenPiece);
+        //TODO
+        msgCallback(
+            `${halma.getPlayerInTurn().color} player turn`, 
+            halma.getPlayerInTurn().color
+        );
+
         return halma;
     }
 
@@ -77,16 +95,11 @@ export class HalmaGame {
         if (move.isValid()) {
             move.execute();
 
-            this.turnContinues = this.canContinue();
+            this.turnContinues = move.canJumpAgain;
             if (!this.turnContinues) {
                 this.changeTurn();
             }
         }
-    }
-
-    canContinue() {
-        //TODO
-        return false;
     }
 
     setChosenPiece(piece) {

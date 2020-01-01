@@ -22,7 +22,6 @@ svg {
     vertical-align: middle;
 }
 
-/* Pelilaudan asettelut. */
 table {
     border: 1px solid black;
     border-spacing: 0;
@@ -30,8 +29,6 @@ table {
     box-sizing: border-box;
 }
 
-/* Ruutukuviointi laudalle. Maalialueella kÃ¤ytetÃ¤Ã¤n eri vÃ¤ripalettia, jotta ne
-kauniiisti erottuvat muista ruuduista. */
 td {
     margin: 0;
     padding: 0;
@@ -59,7 +56,6 @@ tr:nth-child(even) td[class^="camp_"]:nth-child(even) {
     background: #4E8417;
 }
 
-/* Lomakkeen asettelut. */
 fieldset {
     padding: 5px 0px;
     margin-bottom: 5px;

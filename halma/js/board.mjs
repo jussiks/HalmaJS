@@ -38,6 +38,9 @@ export class Board {
     }
 
     getSquare([x, y]) {
+        if (x < 0 || x > this.squares.length - 1 || 
+            y < 0 || y > this.squares.length - 1)
+            return undefined;
         return this.squares[y][x];
     }
 

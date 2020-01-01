@@ -34,6 +34,8 @@ export class Move {
     }
 
     checkCanJumpAgain() {
+        // TODO should also check that the continuation move
+        // is not away from goal
         let neighbours = this.targetSquare.getNeighbours(2);
         for (let newTarget of neighbours) {
             if (canJump(this.targetSquare, newTarget))

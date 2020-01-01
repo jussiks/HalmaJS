@@ -93,11 +93,13 @@ export class HalmaGame {
     movePiece(piece, square) {
         let move = new Move(piece, square);
         if (move.isValid()) {
-            move.execute();
-
-            this.turnContinues = move.canJumpAgain;
-            if (!this.turnContinues) {
-                this.changeTurn();
+            if (!this.turnContinues || move.isJump()) {
+                move.execute();
+                //TODO implement victory checks
+                this.turnContinues = move.canJumpAgain;
+                if (!this.turnContinues) {
+                    this.changeTurn();
+            }
             }
         }
     }

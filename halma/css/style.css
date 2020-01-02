@@ -44,15 +44,15 @@ tr:nth-child(even) td:nth-child(even) {
     background: #A59E9B;
 }
 
-td[class^="camp"] {
+td[class="camp"] {
     background: #9EE05C;
 }
 
-tr:nth-child(odd) td[class^="camp"]:nth-child(odd) {
+tr:nth-child(odd) td[class="camp"]:nth-child(odd) {
     background: #4E8417;
 }
 
-tr:nth-child(even) td[class^="camp_"]:nth-child(even) {
+tr:nth-child(even) td[class="camp"]:nth-child(even) {
     background: #4E8417;
 }
 

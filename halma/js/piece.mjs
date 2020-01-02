@@ -32,6 +32,10 @@ export class Piece {
         square.getElement().appendChild(this.svg);
     }
 
+    isInGoalZone() {
+        return this.getSquare().isGoalZone(this);
+    }
+
     getSquare() {
         return this.square;
     }

@@ -32,6 +32,6 @@ export class Player {
     }
 
     hasWon() {
-        return this.pieces.every(p => p.isInCamp());
+        return this.pieces.every(p => p.isInGoalZone());
     }
 }

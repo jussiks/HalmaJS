@@ -124,7 +124,6 @@ function saveGame() {
 function loadGame() {
     try {
         let halmaJson = JSON.parse(localStorage.getItem(halmaGame_str));
-        console.log(halmaJson);
         return HalmaGame.fromJSON(halmaJson, showMessage, saveGame);
     } 
     catch (e) {

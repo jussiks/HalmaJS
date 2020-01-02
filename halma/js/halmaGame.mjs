@@ -95,11 +95,21 @@ export class HalmaGame {
         if (move.isValid()) {
             if (!this.turnContinues || move.isJump()) {
                 move.execute();
-                //TODO implement victory checks
-                this.turnContinues = move.canJumpAgain;
-                if (!this.turnContinues) {
-                    this.changeTurn();
-            }
+                // bug: [5,6] -> [7,6] could continue? 
+                if (piece.isInGoalZone() && this.getPlayerInTurn().hasWon()) {
+                    this.msgCallback(
+                        `${this.getPlayerInTurn().color} player won!`,
+                        this.getPlayerInTurn().color);
+                    this.chosenPiece.highlight(false);
+                    this.chosenPiece = undefined;
+                    this.turnContinues = true;
+                }
+                else {
+                    this.turnContinues = move.canJumpAgain;
+                    if (!this.turnContinues)
+                        this.changeTurn();
+                }
+                this.saveGameCallback();
             }
         }
     }
@@ -121,7 +131,6 @@ export class HalmaGame {
         if (this.chosenPiece)
             this.chosenPiece.highlight(false);
         this.chosenPiece = undefined;
-        this.saveGameCallback();
         this.msgCallback(
             `${this.getPlayerInTurn().color} player turn`, 
             this.getPlayerInTurn().color

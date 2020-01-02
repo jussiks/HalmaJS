@@ -56,6 +56,8 @@ export class Square {
         ]
     }
 
+    // Yields horizontal, vertical and diagonal neighbours of the 
+    // square that are given distance away.
     * getNeighbours(distance = 1) {
         distance = distance > 0 ? distance : 1;
         for (let i = -1; i < 2; i++) {

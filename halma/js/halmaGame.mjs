@@ -5,9 +5,10 @@ import {Move} from './move.mjs';
 import {HalmaSettings} from './halmaSettings.mjs';
 
 export class HalmaGame {
-    constructor(msgCallback, saveGameCallback) {
-        this.msgCallback = msgCallback;
-        this.saveGameCallback = saveGameCallback;
+    constructor(msgCallback, saveGameCallback, availableSpaceCallback) {
+        this.showMessage = msgCallback;
+        this.saveGame = saveGameCallback;
+        this.getAvailableSpace = availableSpaceCallback;
     }
 
     startGame(settings) {
@@ -23,11 +24,6 @@ export class HalmaGame {
         this.playerInTurn = Math.floor(Math.random() * this.players.length);
         this.turnContinues = false;
 
-        this.msgCallback(
-            `${this.getPlayerInTurn().color} player turn`, 
-            this.getPlayerInTurn().color
-        );
-
         let szones = this.settings.getStartZones();
 
         for (let i = 0; i < szones.length; i++) {
@@ -40,8 +36,9 @@ export class HalmaGame {
                 }
             }
         }
-
-        this.saveGameCallback();
+        this.resizeBoard();
+        this.notifyPlayerInTurn();
+        this.saveGame();
     }
 
     getElement() {
@@ -58,26 +55,31 @@ export class HalmaGame {
         };
     }
 
-    static fromJSON(json, msgCallback, saveGameCallback) {
-        let halma = new HalmaGame(msgCallback, saveGameCallback);
+    static fromJSON(json, msgCallback, saveGameCallback, availableSpaceCallback) {
+        let halma = new HalmaGame(msgCallback, saveGameCallback, availableSpaceCallback);
         halma.settings = HalmaSettings.fromJSON(json['settings']);
         halma.board = new Board(halma.settings, halma.onTdClick.bind(halma));
-        halma.players = json['players'].map(j => Player.fromJSON(j, halma.setChosenPiece.bind(halma), halma.board));
+        halma.players = json['players'].map(
+            plrJson => {
+                let plr = new Player(plrJson['color']);
+                plrJson['pieces'].forEach(
+                    p => {
+                        let piece = new Piece(plr.color, halma.setChosenPiece.bind(halma));
+                        piece.place(halma.board.getSquare(p['position']));
+                        plr.addPiece(piece);
+                        if (p['chosen']) {
+                            halma.chosenPiece = piece;
+                            piece.highlight(true);
+                        }
+                    }
+                )
+                return plr;
+            });
         halma.playerInTurn = json['playerInTurn'];
-        //TODO
-        halma.chosenPiece = halma.getPlayerInTurn().pieces.find(
-            p => p.toJSON() === json['chosenPiece']
-        );
         halma.turnContinues = json['turnContinues'];
 
-        if (halma.chosenPiece)
-            halma.setChosenPiece(halma.chosenPiece);
-        //TODO
-        msgCallback(
-            `${halma.getPlayerInTurn().color} player turn`, 
-            halma.getPlayerInTurn().color
-        );
-
+        halma.notifyPlayerInTurn();
+        halma.resizeBoard();
         return halma;
     }
 
@@ -95,11 +97,8 @@ export class HalmaGame {
         if (move.isValid()) {
             if (!this.turnContinues || move.isJump()) {
                 move.execute();
-                // bug: [5,6] -> [7,6] could continue? 
                 if (piece.isInGoalZone() && this.getPlayerInTurn().hasWon()) {
-                    this.msgCallback(
-                        `${this.getPlayerInTurn().color} player won!`,
-                        this.getPlayerInTurn().color);
+                    this.notifyVictor();
                     this.chosenPiece.highlight(false);
                     this.chosenPiece = undefined;
                     this.turnContinues = true;
@@ -109,7 +108,7 @@ export class HalmaGame {
                     if (!this.turnContinues)
                         this.changeTurn();
                 }
-                this.saveGameCallback();
+                this.saveGame();
             }
         }
     }
@@ -121,6 +120,10 @@ export class HalmaGame {
 
             piece.highlight(true);
             this.chosenPiece = piece;
+
+            //TODO should just save the piece selection
+            //     not the entire game
+            this.saveGame();
         }
     }
 
@@ -131,13 +134,25 @@ export class HalmaGame {
         if (this.chosenPiece)
             this.chosenPiece.highlight(false);
         this.chosenPiece = undefined;
-        this.msgCallback(
+        this.notifyPlayerInTurn();
+    }
+
+    notifyPlayerInTurn() {
+        this.showMessage(
             `${this.getPlayerInTurn().color} player turn`, 
             this.getPlayerInTurn().color
         );
     }
 
-    resizeSquares(squareSize) {
-        this.board.resizeSquares(squareSize);
+    notifyVictor() {
+        this.showMessage(
+            `${this.getPlayerInTurn().color} player won!`,
+            this.getPlayerInTurn().color
+        );
+    }
+
+    resizeBoard() {
+        let size = this.getAvailableSpace();
+        this.board.resize(size);
     }
 }

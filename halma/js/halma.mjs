@@ -22,14 +22,13 @@ window.onload = function () {
     if (halma.board) {
         boardDiv.appendChild(halma.getElement());
         updateForm(halma.settings);
-        resizeBoard();
     }
     else updateForm(new HalmaSettings());
 };
 
 // When window is resized, board will be resized to fit current window.
 window.onresize = function () {
-    resizeBoard();
+    halma.resizeBoard();
 };
 
 /*
@@ -59,21 +58,13 @@ function getSettings() {
     return new HalmaSettings(playerCount, pieceCount, boardSize);
 }
 
-function getAvailableScreenSpace() {
+function getAvailableSpace() {
     let h1 = document.getElementsByTagName('h1')[0].clientHeight;
     let form = Math.max(document.getElementsByTagName('form')[0].clientHeight, 182);
     let width = document.documentElement.clientWidth;
     let height = document.documentElement.clientHeight - h1 - form;
 
     return Math.max(Math.min(width, height), 300)
-}
-
-function resizeBoard() {
-    let size = getAvailableScreenSpace();
-    let squares = document.getElementsByTagName('td');
-    let rowCount = Math.sqrt(squares.length);
-    let squareSize = size / rowCount + "px";
-    halma.resizeSquares(squareSize);
 }
 
 const span = document.getElementById('messages');
@@ -96,8 +87,6 @@ function onNewGameClick(e) {
     let settings = getSettings();
     halma.startGame(settings);
     boardDiv.appendChild(halma.getElement());
-
-    resizeBoard();
 }
 
 function onEndTurnClick(e) {
@@ -122,14 +111,16 @@ function saveGame() {
 }
 
 function loadGame() {
+    let halmaGame;
     try {
         let halmaJson = JSON.parse(localStorage.getItem(halmaGame_str));
-        return HalmaGame.fromJSON(halmaJson, showMessage, saveGame);
+        halmaGame = HalmaGame.fromJSON(halmaJson, showMessage, saveGame, getAvailableSpace);
     } 
     catch (e) {
         console.log(e);
-        return new HalmaGame(showMessage, saveGame);
+        halmaGame = new HalmaGame(showMessage, saveGame, getAvailableSpace);
     }
+    return halmaGame;
 }
 
 function removeGame() {

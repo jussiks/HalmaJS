@@ -5,6 +5,7 @@ export class Piece {
         this.color = color;
         this.onSelected = onPieceSelected;
         this.square = undefined;
+        this.chosen = false;
 
         this.svg = document.createElementNS(xmlns, 'svg');
         this.svg.setAttribute('viewBox', '0 0 100 100');
@@ -22,7 +23,11 @@ export class Piece {
     }
 
     toJSON() {
-        return this.getSquare().getPosition();
+        return {
+            'chosen': this.chosen,
+            'color': this.color,
+            'position': this.getSquare().getPosition()
+        };
     }
 
     place(square) {
@@ -49,10 +54,12 @@ export class Piece {
         if (b) {
             this.circle.setAttributeNS(null, 'stroke', '#FFD635');
             this.circle.setAttributeNS(null, 'stroke-width', 8);
+            this.chosen = true;
         }
         else {
             this.circle.setAttributeNS(null, 'stroke', '#343538');
             this.circle.setAttributeNS(null, 'stroke-width', 4);
+            this.chosen = false;
         }
     }
 }

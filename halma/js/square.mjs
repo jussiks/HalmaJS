@@ -41,8 +41,8 @@ export class Square {
     }
 
     resize(size) {
-        this.td.style.width = size;
-        this.td.style.height = size;
+        this.td.style.width = `${size}px`;
+        this.td.style.height = `${size}px`;
     }
 
     absDistance(otherSquare) {

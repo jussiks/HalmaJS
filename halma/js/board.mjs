@@ -29,10 +29,6 @@ export class Board {
             square => square.firstChild ? square.firstChild.getAttribute('class') : ''));
     }
 
-    isFree(square) {
-        return square.firstChild ? true : false;
-    }
-
     getElement() {
         return this.table;
     }
@@ -50,8 +46,8 @@ export class Board {
         this.onSquareClick(td);
     }
 
-    resizeSquares(squareSize) {
-        this.squares.forEach(row => row.forEach(
-            square => square.resize(squareSize)));
+    resize(size) {
+        let squareSize = size / this.squares.length;
+        this.squares.forEach(row => row.forEach(sqr => sqr.resize(squareSize)));
     }
 }
